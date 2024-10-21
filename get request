@@ -1,0 +1,17 @@
+from scrapethat import *
+
+def get_news_links(link):
+    # for holding the resultant list
+    news_list = []
+    t=read_html(link)
+    # Making a GET request
+    news_blocks = t.select_one('.section-listing').select(".news-article-inline")
+
+    # Parsing the HTML
+    for news_id in range(len(news_blocks)):
+        my_new_link = f"https://btvnovinite.bg{news_blocks[news_id].select('a')[0]['href']} "
+        news_list.append(my_new_link)
+
+    return news_list
+
+get_news_links('https://btvnovinite.bg/search/?q=роми&o=date&page=3')
