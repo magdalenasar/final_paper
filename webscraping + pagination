@@ -1,0 +1,39 @@
+import pandas as pd
+from bs4 import BeautifulSoup
+import requests  # Ensure you have requests installed to fetch the HTML content
+
+# Placeholder list of article URLs
+all_roma_articles = ['https://example.com/article1', 'https://example.com/article2']  # Replace with actual URLs
+
+# Define function to process each article link
+def process_article(news_link):
+    # Fetch HTML content of the article page
+    response = requests.get(news_link)
+    t = BeautifulSoup(response.text, 'html.parser')
+    
+    # Extract content using selectors
+    news_article_title = t.select_one(".article-title").text.strip() if t.select_one(".article-title") else "No Title"
+    news_article_date = t.select_one(".date-time").text.strip() if t.select_one(".date-time") else "No Date"
+    news_article_subtitle = t.select_one(".article-summary").text.strip() if t.select_one(".article-summary") else "No Subtitle"
+    news_article_body = t.select_one(".article-body").text.strip() if t.select_one(".article-body") else "No Body"
+    
+    # Structure data in a dictionary
+    article_data = {
+        "title": news_article_title,
+        "subtitle": news_article_subtitle,
+        "date": news_article_date,
+        "body": news_article_body,
+        "link": news_link
+    }
+    return article_data
+
+# Loop through all articles and process them
+all_roma_news_article_data = []
+for one_news_link in all_roma_articles:
+    all_roma_news_article_data.append(process_article(one_news_link))
+
+# Convert the list of dictionaries to a DataFrame
+df = pd.DataFrame(all_roma_news_article_data)
+
+# Display the DataFrame
+print(df)
