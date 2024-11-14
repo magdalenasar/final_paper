@@ -1,0 +1,55 @@
+!pip install scrapethat
+from scrapethat import *
+import pandas as pd 
+from tqdm import tqdm
+
+
+def get_news_links(link):
+    # for holding the resultant list
+    news_list = []
+    t=read_html(link)
+    # Making a GET request
+    news_blocks = t.select_one('.section-listing').select(".news-article-inline")
+
+    # Parsing the HTML
+    for news_id in range(len(news_blocks)):
+        my_new_link = f"https://btvnovinite.bg{news_blocks[news_id].select('a')[0]['href']}"
+        news_list.append(my_new_link)
+
+    return news_list
+
+get_news_links('https://btvnovinite.bg/search/?q=роми&o=date&page=3')
+
+links_10 = [f"https://btvnovinite.bg/search/?q=%D1%80%D0%BE%D0%BC%D0%B8&o=date&page={x}" for x in range(1,11)]
+
+all_roma_articles = []
+
+for new_link in links_10:
+    all_roma_articles.extend(get_news_links(new_link))
+
+all_roma_articles
+
+all_data.to_excel('all_roma_articles.xlsx')
+
+def process_article(news_link):
+    t=read_html(news_link)
+    news_article_title = t.select_one(".article-title").text
+    news_article_date = t.select_one(".date-time").text
+    news_article_subtitle = t.select_one(".article-summary").text
+    news_article_body = t.select_one(".article-body").text
+
+    article_data = {
+        "title": news_article_title,
+        "subtitle":news_article_subtitle,
+        "date": news_article_date,
+        "body":news_article_body,
+        "link": news_link
+    }
+    return(article_data)
+
+process_article(all_roma_articles[1])
+
+#creating the table, conv. map -> list,bar library
+all_data = pd.DataFrame(list(map(process_article, tqdm(all_roma_articles))))
+
+all_data.to_excel('all_roma_articles.xlsx')
